@@ -1,74 +1,64 @@
-// Toolbar
-// Namespace: PhotobookEditor
-var PhotobookEditor = PhotobookEditor || {};
-PhotobookEditor.UI = PhotobookEditor.UI || {};
+import { DOM } from '../utils/dom-helpers.js';
+import * as Storage from '../core/storage.js';
+import * as ProjectConfig from '../features/project-config.js';
+import * as CanvasWorkspace from './canvas-workspace.js';
 
-PhotobookEditor.UI.Toolbar = (function() {
-    'use strict';
+/**
+ * Initialisiert die Toolbar
+ */
+export function init() {
+    setupEventListeners();
+}
 
-    var DOM = PhotobookEditor.Utils.DOM;
-
-    /**
-     * Initialisiert die Toolbar
-     */
-    function init() {
-        setupEventListeners();
+/**
+ * Richtet Event-Listener ein
+ */
+function setupEventListeners() {
+    // Speichern-Button
+    var btnSave = DOM.getById('btn-save');
+    if (btnSave) {
+        btnSave.addEventListener('click', handleSave);
     }
 
-    /**
-     * Richtet Event-Listener ein
-     */
-    function setupEventListeners() {
-        // Speichern-Button
-        var btnSave = DOM.getById('btn-save');
-        if (btnSave) {
-            btnSave.addEventListener('click', handleSave);
+    // Projekt-Einstellungen-Button
+    var btnConfig = DOM.getById('btn-project-config');
+    if (btnConfig) {
+        btnConfig.addEventListener('click', handleProjectConfig);
+    }
+
+    // Text hinzufügen-Button
+    var btnAddText = DOM.getById('btn-add-text');
+    if (btnAddText) {
+        btnAddText.addEventListener('click', handleAddText);
+    }
+
+    // Keyboard-Shortcut: Strg+S zum Speichern
+    document.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            handleSave();
         }
+    });
+}
 
-        // Projekt-Einstellungen-Button
-        var btnConfig = DOM.getById('btn-project-config');
-        if (btnConfig) {
-            btnConfig.addEventListener('click', handleProjectConfig);
-        }
+/**
+ * Speichern-Handler
+ */
+function handleSave() {
+    Storage.saveProject();
+}
 
-        // Text hinzufügen-Button
-        var btnAddText = DOM.getById('btn-add-text');
-        if (btnAddText) {
-            btnAddText.addEventListener('click', handleAddText);
-        }
+/**
+ * Projekt-Einstellungen-Handler
+ */
+function handleProjectConfig() {
+    ProjectConfig.open();
+}
 
-        // Keyboard-Shortcut: Strg+S zum Speichern
-        document.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                e.preventDefault();
-                handleSave();
-            }
-        });
-    }
+/**
+ * Text hinzufügen-Handler
+ */
+function handleAddText() {
+    CanvasWorkspace.addText();
+}
 
-    /**
-     * Speichern-Handler
-     */
-    function handleSave() {
-        PhotobookEditor.Core.Storage.saveProject();
-    }
-
-    /**
-     * Projekt-Einstellungen-Handler
-     */
-    function handleProjectConfig() {
-        PhotobookEditor.Features.ProjectConfig.open();
-    }
-
-    /**
-     * Text hinzufügen-Handler
-     */
-    function handleAddText() {
-        PhotobookEditor.UI.CanvasWorkspace.addText();
-    }
-
-    // Public API
-    return {
-        init: init
-    };
-})();

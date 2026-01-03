@@ -1,62 +1,48 @@
-// Statusleiste
-// Namespace: PhotobookEditor
-var PhotobookEditor = PhotobookEditor || {};
-PhotobookEditor.UI = PhotobookEditor.UI || {};
+import { DOM } from '../utils/dom-helpers.js';
+import * as PageManager from '../core/page.js';
+import * as Project from '../core/project.js';
 
-PhotobookEditor.UI.Statusbar = (function() {
-    'use strict';
+/**
+ * Initialisiert die Statusleiste
+ */
+export function init() {
+    PageManager.onPageChange(render);
+    render();
+}
 
-    var DOM = PhotobookEditor.Utils.DOM;
-    var PageManager = PhotobookEditor.Core.PageManager;
+/**
+ * Rendert die Statusleiste
+ */
+export function render() {
+    updatePageInfo();
+}
 
-    /**
-     * Initialisiert die Statusleiste
-     */
-    function init() {
-        PageManager.onPageChange(render);
-        render();
-    }
+/**
+ * Aktualisiert Seiteninformationen
+ */
+function updatePageInfo() {
+    var pages = Project.getPages();
+    var currentIndex = PageManager.getCurrentPageIndex();
+    var totalPages = pages.length;
 
-    /**
-     * Rendert die Statusleiste
-     */
-    function render() {
-        updatePageInfo();
-    }
-
-    /**
-     * Aktualisiert Seiteninformationen
-     */
-    function updatePageInfo() {
-        var pages = PhotobookEditor.Core.Project.getPages();
-        var currentIndex = PageManager.getCurrentPageIndex();
-        var totalPages = pages.length;
-
-        var pageInfoElement = DOM.getById('status-page-info');
-        if (pageInfoElement) {
-            if (totalPages === 0) {
-                pageInfoElement.textContent = 'Keine Seiten';
-            } else {
-                pageInfoElement.textContent = 'Seite ' + (currentIndex + 1) + ' von ' + totalPages;
-            }
+    var pageInfoElement = DOM.getById('status-page-info');
+    if (pageInfoElement) {
+        if (totalPages === 0) {
+            pageInfoElement.textContent = 'Keine Seiten';
+        } else {
+            pageInfoElement.textContent = 'Seite ' + (currentIndex + 1) + ' von ' + totalPages;
         }
     }
+}
 
-    /**
-     * Setzt Status-Text
-     * @param {string} text - Status-Text
-     */
-    function setStatusText(text) {
-        var statusTextElement = DOM.getById('status-text');
-        if (statusTextElement) {
-            statusTextElement.textContent = text;
-        }
+/**
+ * Setzt Status-Text
+ * @param {string} text - Status-Text
+ */
+export function setStatusText(text) {
+    var statusTextElement = DOM.getById('status-text');
+    if (statusTextElement) {
+        statusTextElement.textContent = text;
     }
+}
 
-    // Public API
-    return {
-        init: init,
-        render: render,
-        setStatusText: setStatusText
-    };
-})();
