@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mein Fotobuch</title>
+
+    <!-- Fabric.js von CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="src/css/reset.css">
+    <link rel="stylesheet" href="src/css/layout.css">
+    <link rel="stylesheet" href="src/css/components.css">
+    <link rel="stylesheet" href="src/css/print.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Toolbar (oben) -->
+        <header id="toolbar" class="toolbar">
+            <div class="toolbar-section">
+                <button id="btn-save" class="btn btn-primary" title="Speichern (Strg+S)">💾 Speichern</button>
+            </div>
+            <div class="toolbar-section">
+                <h1 class="app-title">Fotobuch-Editor</h1>
+            </div>
+            <div class="toolbar-section">
+                <button id="btn-project-config" class="btn" title="Projekt-Einstellungen">⚙️ Einstellungen</button>
+            </div>
+        </header>
+
+        <!-- Werkzeugleiste -->
+        <nav id="tool-panel" class="tool-panel">
+            <button id="btn-add-page" class="btn" title="Neue Seite hinzufügen">📄 Neue Seite</button>
+            <button id="btn-delete-page" class="btn" title="Aktuelle Seite löschen">🗑️ Seite löschen</button>
+            <button id="btn-add-image" class="btn" title="Bild hinzufügen">🖼️ Bild hinzufügen</button>
+            <button id="btn-add-text" class="btn" title="Textfeld hinzufügen">📝 Text hinzufügen</button>
+            <div class="separator"></div>
+            <button id="btn-zoom-out" class="btn" title="Verkleinern">➖</button>
+            <span id="zoom-level" class="zoom-display">100%</span>
+            <button id="btn-zoom-in" class="btn" title="Vergrößern">➕</button>
+        </nav>
+
+        <!-- Hauptbereich (3 Spalten) -->
+        <main id="main-content" class="main-content">
+            <!-- Linke Sidebar: Seitenübersicht -->
+            <aside id="page-overview" class="sidebar sidebar-left">
+                <h2 class="sidebar-title">Seiten</h2>
+                <div id="page-list" class="page-list">
+                    <!-- Seiten-Thumbnails werden hier dynamisch eingefügt -->
+                </div>
+            </aside>
+
+            <!-- Mitte: Canvas-Workspace -->
+            <section id="workspace" class="workspace">
+                <div id="canvas-container" class="canvas-container">
+                    <canvas id="canvas"></canvas>
+                </div>
+            </section>
+
+            <!-- Rechte Sidebar: Eigenschaften -->
+            <aside id="properties-panel" class="sidebar sidebar-right">
+                <h2 class="sidebar-title">Eigenschaften</h2>
+                <div id="properties-content" class="properties-content">
+                    <!-- Element-Eigenschaften (wenn Element ausgewählt) -->
+                    <div id="element-properties" class="property-group" style="display: none;">
+                        <h3>Element</h3>
+                        <div class="property-item">
+                            <label>Typ:</label>
+                            <span id="prop-element-type">-</span>
+                        </div>
+
+                        <!-- Text-Formatierung -->
+                        <div id="text-formatting" style="display: none;">
+                            <div class="form-group">
+                                <label for="prop-font-family">Schriftart:</label>
+                                <select id="prop-font-family" class="form-select">
+                                    <option value="Arial">Arial</option>
+                                    <option value="Georgia">Georgia</option>
+                                    <option value="Times New Roman">Times New Roman</option>
+                                    <option value="Verdana">Verdana</option>
+                                    <option value="Courier New">Courier New</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="prop-font-size">Schriftgröße (pt):</label>
+                                <input type="number" id="prop-font-size" class="form-input" min="6" max="144" value="16">
+                            </div>
+                            <div class="form-group">
+                                <label for="prop-text-color">Textfarbe:</label>
+                                <input type="color" id="prop-text-color" class="form-input" value="#000000">
+                            </div>
+                            <div class="form-group">
+                                <label>Stil:</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <button id="prop-text-bold" class="btn" style="font-weight: bold;">B</button>
+                                    <button id="prop-text-italic" class="btn" style="font-style: italic;">I</button>
+                                    <button id="prop-text-underline" class="btn" style="text-decoration: underline;">U</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Projekt-Eigenschaften -->
+                    <div id="project-properties" class="property-group">
+                        <h3>Projekt</h3>
+                        <div class="property-item">
+                            <label>Name:</label>
+                            <span id="prop-project-name">Mein Fotobuch</span>
+                        </div>
+                        <div class="property-item">
+                            <label>Seitenformat:</label>
+                            <span id="prop-page-format">A4 Querformat</span>
+                        </div>
+                        <div class="property-item">
+                            <label>Größe:</label>
+                            <span id="prop-page-size">297 x 210 mm</span>
+                        </div>
+                        <div class="property-item">
+                            <label>Auflösung:</label>
+                            <span id="prop-dpi">300 DPI</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Statusleiste (unten) -->
+        <footer id="statusbar" class="statusbar">
+            <span id="status-text">Bereit</span>
+            <span id="status-page-info">Seite 1 von 1</span>
+        </footer>
+    </div>
+
+    <!-- Modal: Bild-Browser -->
+    <div id="modal-image-browser" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Bilder auswählen</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="image-grid" class="image-grid">
+                    <!-- Bilder werden hier dynamisch eingefügt -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-image-browser-cancel" class="btn">Abbrechen</button>
+                <button id="btn-image-browser-add" class="btn btn-primary">Hinzufügen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Projekt-Konfiguration -->
+    <div id="modal-project-config" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Projekt-Einstellungen</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="input-project-name">Projekt-Name:</label>
+                    <input type="text" id="input-project-name" class="form-input" value="Mein Fotobuch">
+                </div>
+                <div class="form-group">
+                    <label for="select-page-format">Seitenformat:</label>
+                    <select id="select-page-format" class="form-select">
+                        <option value="a4-landscape">A4 Querformat (297 x 210 mm)</option>
+                        <option value="a4-portrait">A4 Hochformat (210 x 297 mm)</option>
+                        <option value="square-30">Quadratisch 30x30 cm</option>
+                        <option value="square-21">Quadratisch 21x21 cm</option>
+                        <option value="letter-landscape">US Letter Querformat (279 x 216 mm)</option>
+                        <option value="letter-portrait">US Letter Hochformat (216 x 279 mm)</option>
+                        <option value="custom">Benutzerdefiniert</option>
+                    </select>
+                </div>
+                <div id="custom-format-inputs" class="form-group" style="display: none;">
+                    <label>Benutzerdefinierte Größe (mm):</label>
+                    <div class="input-row">
+                        <input type="number" id="input-page-width" class="form-input" placeholder="Breite" min="100" max="500">
+                        <span>×</span>
+                        <input type="number" id="input-page-height" class="form-input" placeholder="Höhe" min="100" max="500">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="input-margin">Seitenrand (mm):</label>
+                    <input type="number" id="input-margin" class="form-input" value="5" min="0" max="50">
+                </div>
+                <div class="form-group">
+                    <label for="input-bleed">Anschnitt (mm):</label>
+                    <input type="number" id="input-bleed" class="form-input" value="3" min="0" max="10">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-config-cancel" class="btn">Abbrechen</button>
+                <button id="btn-config-save" class="btn btn-primary">Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Projekt-Daten als JSON -->
+    <script id="project-data" type="application/json">
+{
+  "projectInfo": {
+    "name": "Mein Fotobuch",
+    "created": "2026-01-02T10:00:00Z",
+    "modified": "2026-01-02T10:00:00Z",
+    "version": "1.0"
+  },
+  "pageFormat": {
+    "width": 297,
+    "height": 210,
+    "unit": "mm",
+    "dpi": 300,
+    "margins": {
+      "top": 5,
+      "right": 5,
+      "bottom": 5,
+      "left": 5
+    },
+    "bleed": 3
+  },
+  "pages": []
+}
+    </script>
+
+    <!-- JavaScript-Module -->
+    <script src="src/js/utils/units.js"></script>
+    <script src="src/js/utils/dom-helpers.js"></script>
+    <script src="src/js/core/project.js"></script>
+    <script src="src/js/core/page.js"></script>
+    <script src="src/js/core/storage.js"></script>
+    <script src="src/js/ui/toolbar.js"></script>
+    <script src="src/js/ui/page-overview.js"></script>
+    <script src="src/js/ui/properties-panel.js"></script>
+    <script src="src/js/ui/statusbar.js"></script>
+    <script src="src/js/ui/canvas-workspace.js"></script>
+    <script src="src/js/features/image-browser.js"></script>
+    <script src="src/js/features/project-config.js"></script>
+    <script src="src/js/main.js"></script>
+</body>
+</html>

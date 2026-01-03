@@ -1,0 +1,19 @@
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Beispielbilder (außer .gitkeep)
+example/*
+
+# Auto-Save
+*.backup.html
+
+# Logs
+*.log

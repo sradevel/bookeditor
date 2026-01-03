@@ -1,0 +1,48 @@
+/* Print Styles - Für Phase 4 (PDF-Export) */
+
+@media print {
+    /* Alle UI-Elemente ausblenden */
+    .toolbar,
+    .tool-panel,
+    .sidebar,
+    .statusbar,
+    .modal {
+        display: none !important;
+    }
+
+    /* Nur Canvas anzeigen */
+    #app {
+        display: block;
+        height: auto;
+    }
+
+    .main-content {
+        display: block;
+    }
+
+    .workspace {
+        padding: 0;
+        background: white;
+    }
+
+    .canvas-container {
+        box-shadow: none;
+        border: none;
+    }
+
+    /* Seitengröße wird dynamisch per JavaScript gesetzt */
+    @page {
+        margin: 0;
+        /* size wird per JavaScript gesetzt, z.B. size: 297mm 210mm; */
+    }
+
+    /* Jede Seite einzeln */
+    .print-page {
+        page-break-after: always;
+        position: relative;
+    }
+
+    .print-page:last-child {
+        page-break-after: auto;
+    }
+}
